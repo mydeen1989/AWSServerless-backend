@@ -1,0 +1,61 @@
+service: redfirehosediscussions
+
+provider:
+    name: aws
+    runtime: nodejs12.x
+    profile: custom-profile
+    region: us-east-1
+    environment:
+        connectionTableName: ${self:custom.connectionTableName}
+        discussionTableName: ${self:custom.discussionTableName}
+    iamRoleStatements:
+        - Effect: Allow
+          Action:
+              - dynamodb:*
+          Resource: '*'
+
+custom:
+    connectionTableName: rfhconnections
+    discussionTableName: rfhdiscussions
+
+functions:
+    websocket-rfh-connect:
+        handler: lambdas/websockets/connect.handler
+        events:
+            - websocket:
+                  route: $connect
+            - websocket:
+                  route: $disconnect
+            - websocket:
+                  route: $default
+            - websocket:
+                  route: message      
+    websocket-response:
+        handler: lambdas/websockets/response.handler
+        events:
+            - stream: arn:aws:dynamodb:us-east-1:814846041845:table/rfhdiscussions/stream/2021-04-10T08:18:02.194
+
+resources:
+    Resources:
+        RFHUsersConnectionTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${self:custom.connectionTableName}
+                AttributeDefinitions:
+                    - AttributeName: connectionId
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: connectionId
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST
+        RFHUsersDiscussionTable:
+            Type: AWS::DynamoDB::Table
+            Properties:
+                TableName: ${self:custom.discussionTableName}
+                AttributeDefinitions:
+                    - AttributeName: discussionId
+                      AttributeType: S
+                KeySchema:
+                    - AttributeName: discussionId
+                      KeyType: HASH
+                BillingMode: PAY_PER_REQUEST
