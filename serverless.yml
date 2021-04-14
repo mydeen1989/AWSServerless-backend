@@ -15,8 +15,8 @@ provider:
           Resource: '*'
 
 custom:
-    connectionTableName: rfhconnections
-    discussionTableName: rfhdiscussions
+    connectionTableName: connections
+    discussionTableName: discussions
 
 functions:
     websocket-rfh-connect:
@@ -33,7 +33,7 @@ functions:
     websocket-response:
         handler: lambdas/websockets/response.handler
         events:
-            - stream: arn:aws:dynamodb:us-east-1:814846041845:table/rfhdiscussions/stream/2021-04-10T08:18:02.194
+            - stream: <sample arn>
 
 resources:
     Resources:
